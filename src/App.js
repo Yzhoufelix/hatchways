@@ -37,10 +37,13 @@ class App extends Component {
         firstName: student.firstName.toLowerCase(),
         lastName: student.lastName.toLowerCase(),
         name: `${student.firstName} ${student.lastName}`,
+        company: student.company,
         email: student.email,
         skill: student.skill,
+        gradeArray: student.grades,
         average: average,
-        key: student.id
+        key: student.id,
+        tags: []
       }
       studentArray.push(obj)
     })
@@ -49,40 +52,76 @@ class App extends Component {
       students: studentArray,
       filteredArray: studentArray
     })
-
   }
 
-  handleTextChange = (e) => {
+  addTag = (id, tags) => {
+    const students = Array.from(this.state.students)
+    students[id - 1].tags = tags;
+    this.setState({
+      students
+    })
+  }
+
+  handleNameChange = (e) => {
     const searchQuery = e.target.value.toLowerCase();
 
-    console.log(searchQuery)
     const match = (students) => {
       return (
         students.firstName.includes(searchQuery) || students.lastName.includes(searchQuery)
       )
     }
+
     const filteredArray = this.state.students.filter(match)
-    console.log(filteredArray)
 
     this.setState({
       filteredArray: filteredArray
     })
+  }
 
+  handleTagChange = (e) => {
+    const searchQuery = e.target.value.toLowerCase();
+    let tagMatchArray = this.state.students;
+    let filteredArray = this.state.students;
+
+    const match = (student) => {
+      return student.tagMatch === true
+    }
+
+    tagMatchArray.forEach((student) => {
+      student.tags.forEach((tag) => {
+        student.tagMatch = false
+        if (tag.includes(searchQuery)) {
+          student.tagMatch = true
+        } 
+      })
+    })
+
+    filteredArray = tagMatchArray.filter(match)
+
+    if (searchQuery.length === 0) {
+      filteredArray = this.state.students;
+    }
+
+    this.setState({
+      filteredArray: filteredArray
+    })
   }
 
   render() {
     return (
       <div className="App">
-        <h1>hey</h1>
-        <section>
-          <form action="">
-            <input type="text" onChange={this.handleTextChange}/>
+        <section className="studentContainer">
+
+          <form action="" className="searchForm">
+            <input type="text" placeholder="Search by name" onChange={this.handleNameChange}/>
+            <input type="text" placeholder="Search by tag" onChange={this.handleTagChange} />
           </form>
+
           {this.state.students ?
             <div>
               {this.state.filteredArray.map((student) => {
                 return (
-                  <Student key={student.key} student={student} />
+                  <Student key={student.key} student={student} addTag={this.addTag}/>
                 )
               })}
             </div>
